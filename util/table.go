@@ -56,7 +56,7 @@ func GenerateSQL(cls []Desc, tableName string) string {
 	}
 
 	var (
-		sql = "create table " + tableName + "("
+		sql = "create table if not exists " + tableName + "("
 		err error
 		sub string
 	)
