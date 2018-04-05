@@ -133,7 +133,7 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 		return nil, "", ErrNotStruct
 	}
 
-	tableName := ref.Name()
+	tableName := strings.ToLower(ref.Name())
 	num := ref.NumField()
 	cls := []Desc{}
 	for i := 0; i < num; i++ {
@@ -162,9 +162,8 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 func getBoolColumn(param string) bool {
 	if param == "true" {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 //获取Golang定义的字段类型 作为默认的

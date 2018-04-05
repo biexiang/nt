@@ -20,7 +20,7 @@ Define
 
 **/
 
-type abcd struct {
+type Abcd struct {
 	ID   int    `pk:"true" default:"auto" type:"int(8)" comment:"主键"`
 	Name string `type:"varchar(255)" default:"golang" index:"true"`
 	Pass string `unique:"true"`
@@ -28,7 +28,7 @@ type abcd struct {
 }
 
 func main() {
-	sql, err := util.GetSQL(abcd{})
+	sql, err := util.GetSQL(Abcd{})
 	if err != nil {
 		log.Println(err)
 		return
