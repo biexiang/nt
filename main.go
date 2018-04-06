@@ -8,6 +8,9 @@ import (
 
 /**
 
+Interface{} 可以自定义之后的关系，不包含到建表内
+
+
 Define
 	name 	字段名称
 	pk		主键(bool)

@@ -9,6 +9,8 @@ import (
 
 /**
 
+Interface{} 可以自定义之后的关系，不包含到建表内
+
 Define
 	name 	字段名称
 	pk		主键(bool)
@@ -37,7 +39,7 @@ var (
 	//ErrNotStruct .
 	ErrNotStruct = errors.New("params is not a struct")
 	//ErrNoType .
-	ErrNoType = errors.New("Column don't have type")
+	ErrNoType = errors.New("Column don't have type, Maybe it is a interface{} which you use to keep it not into sql")
 )
 
 //GetSQL 获取数据库创建sql
@@ -173,6 +175,9 @@ func getOriginType(orgin string) string {
 		return "varchar(32)"
 	case "int", "uint32", "uint64", "int32", "int64":
 		return "int(11)"
+	//Interface{} 处理 不加入sql
+	case "":
+		return ""
 	default:
 		return "varchar(64)"
 	}
