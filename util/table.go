@@ -9,7 +9,6 @@ import (
 
 /**
 
-Interface{} 可以自定义之后的关系，不包含到建表内
 
 Define
 	name 	字段名称
@@ -20,6 +19,7 @@ Define
 	null  	是否为NULL(bool)
 	default 默认值/自增(auto)
 	comment 注释
+	exclude 不否包含到sql
 
 **/
 
@@ -33,13 +33,14 @@ type Desc struct {
 	Index    bool
 	Null     bool
 	Comment  string
+	Exclude  bool
 }
 
 var (
 	//ErrNotStruct .
 	ErrNotStruct = errors.New("params is not a struct")
 	//ErrNoType .
-	ErrNoType = errors.New("Column don't have type, Maybe it is a interface{} which you use to keep it not into sql")
+	ErrNoType = errors.New("Column don't have type")
 )
 
 //GetSQL 获取数据库创建sql
@@ -64,6 +65,11 @@ func GenerateSQL(cls []Desc, tableName string) string {
 	)
 
 	for _, cl := range cls {
+
+		if cl.Exclude {
+			continue
+		}
+
 		if sub, err = getCL(cl); err != nil {
 			log.Println(err)
 			err = nil
@@ -149,6 +155,7 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 			Null:     getBoolColumn(field.Tag.Get("null")),
 			Comment:  field.Tag.Get("comment"),
 			Defaulty: field.Tag.Get("default"),
+			Exclude:  getBoolColumn(field.Tag.Get("exclude")),
 		}
 		customType := field.Tag.Get("type")
 		if customType != "" {
@@ -175,9 +182,6 @@ func getOriginType(orgin string) string {
 		return "varchar(32)"
 	case "int", "uint32", "uint64", "int32", "int64":
 		return "int(11)"
-	//Interface{} 处理 不加入sql
-	case "":
-		return ""
 	default:
 		return "varchar(64)"
 	}

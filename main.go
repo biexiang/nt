@@ -8,7 +8,6 @@ import (
 
 /**
 
-Interface{} 可以自定义之后的关系，不包含到建表内
 
 
 Define
@@ -20,6 +19,7 @@ Define
 	null  	是否为NULL(bool)
 	default 默认值/自增(auto)
 	comment 注释
+	exclude 不包含到sql
 
 **/
 
