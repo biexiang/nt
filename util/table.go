@@ -41,6 +41,8 @@ var (
 	ErrNotStruct = errors.New("params is not a struct")
 	//ErrNoType .
 	ErrNoType = errors.New("Column don't have type")
+	//ErrTableName .
+	ErrTableName = errors.New("table error name")
 )
 
 //GetSQL 获取数据库创建sql
@@ -185,4 +187,47 @@ func getOriginType(orgin string) string {
 	default:
 		return "varchar(64)"
 	}
+}
+
+//GetFields 获取列
+func GetFields(in interface{}) (out []string) {
+	fs := reflect.TypeOf(in)
+	for i := 0; i < fs.NumField(); i++ {
+		name := fs.Field(i).Name
+		if name != "ID" {
+			out = append(out, strings.ToLower(name))
+		}
+	}
+	return
+}
+
+//GetValues 获取值
+func GetValues(in interface{}) (out []interface{}) {
+	vs := reflect.ValueOf(in)
+	fs := reflect.TypeOf(in)
+	for i := 0; i < vs.NumField(); i++ {
+		if fs.Field(i).Name == "ID" {
+			continue
+		}
+		t := vs.Field(i).Kind()
+		switch t {
+		case reflect.Int:
+			out = append(out, vs.Field(i).Interface().(int))
+		case reflect.String:
+			out = append(out, vs.Field(i).Interface().(string))
+		default:
+			continue
+		}
+	}
+	return
+}
+
+//GetTableName 获取表名
+func GetTableName(in interface{}) (string, error) {
+	ref := reflect.TypeOf(in)
+	typ := ref.Kind()
+	if typ != reflect.Struct {
+		return "", ErrTableName
+	}
+	return strings.ToLower(ref.Name()), nil
 }
