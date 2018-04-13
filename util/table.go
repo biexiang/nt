@@ -43,6 +43,8 @@ var (
 	ErrNoType = errors.New("Column don't have type")
 	//ErrTableName .
 	ErrTableName = errors.New("table error name")
+	//ErrKeyNotFound .
+	ErrKeyNotFound = errors.New("key not found")
 )
 
 //GetSQL 获取数据库创建sql
@@ -137,6 +139,7 @@ func getCL(cl Desc) (string, error) {
 func GetInfo(st interface{}) ([]Desc, string, error) {
 
 	ref := reflect.TypeOf(st)
+	val := reflect.ValueOf(st)
 
 	typ := ref.Kind()
 	if typ != reflect.Struct {
@@ -147,6 +150,16 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 	num := ref.NumField()
 	cls := []Desc{}
 	for i := 0; i < num; i++ {
+
+		if val.Field(i).Kind() == reflect.Struct {
+			desc, _, err := GetInfo(val.Field(i).Interface())
+			if err != nil {
+				return nil, "", err
+			}
+			cls = append(cls, desc...)
+			continue
+		}
+
 		field := ref.Field(i)
 		temp := Desc{
 			Name:     field.Name,
@@ -192,7 +205,16 @@ func getOriginType(orgin string) string {
 //GetFields 获取列
 func GetFields(in interface{}) (out []string) {
 	fs := reflect.TypeOf(in)
+	vs := reflect.ValueOf(in)
 	for i := 0; i < fs.NumField(); i++ {
+
+		//结构体的话，使用子字段
+		if vs.Field(i).Kind() == reflect.Struct {
+			fields := GetFields(vs.Field(i).Interface())
+			out = append(out, fields...)
+			continue
+		}
+
 		name := fs.Field(i).Name
 		if name != "ID" {
 			out = append(out, strings.ToLower(name))
@@ -206,6 +228,14 @@ func GetValues(in interface{}) (out []interface{}) {
 	vs := reflect.ValueOf(in)
 	fs := reflect.TypeOf(in)
 	for i := 0; i < vs.NumField(); i++ {
+
+		//结构体的话，使用子字段
+		if vs.Field(i).Kind() == reflect.Struct {
+			values := GetValues(vs.Field(i).Interface())
+			out = append(out, values...)
+			continue
+		}
+
 		if fs.Field(i).Name == "ID" {
 			continue
 		}
@@ -213,6 +243,10 @@ func GetValues(in interface{}) (out []interface{}) {
 		switch t {
 		case reflect.Int:
 			out = append(out, vs.Field(i).Interface().(int))
+		case reflect.Int64:
+			out = append(out, vs.Field(i).Interface().(int64))
+		case reflect.Uint64:
+			out = append(out, vs.Field(i).Interface().(uint64))
 		case reflect.String:
 			out = append(out, vs.Field(i).Interface().(string))
 		default:
@@ -230,4 +264,12 @@ func GetTableName(in interface{}) (string, error) {
 		return "", ErrTableName
 	}
 	return strings.ToLower(ref.Name()), nil
+}
+
+//GetFieldValue 获取字段值
+func GetFieldValue(in interface{}, key string) (interface{}, error) {
+	if in == nil || key == "" {
+		return "", ErrKeyNotFound
+	}
+	return reflect.ValueOf(in).FieldByName(key).Interface(), nil
 }
