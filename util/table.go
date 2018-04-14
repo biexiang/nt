@@ -215,10 +215,13 @@ func GetFields(in interface{}) (out []string) {
 			continue
 		}
 
-		name := fs.Field(i).Name
-		if name != "ID" {
-			out = append(out, strings.ToLower(name))
+		//Exclude => Continue || ID
+		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
+			continue
 		}
+
+		name := fs.Field(i).Name
+		out = append(out, strings.ToLower(name))
 	}
 	return
 }
@@ -236,9 +239,11 @@ func GetValues(in interface{}) (out []interface{}) {
 			continue
 		}
 
-		if fs.Field(i).Name == "ID" {
+		//Exclude => Continue || ID
+		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
 			continue
 		}
+
 		t := vs.Field(i).Kind()
 		switch t {
 		case reflect.Int:
