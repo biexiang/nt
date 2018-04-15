@@ -215,8 +215,8 @@ func GetFields(in interface{}) (out []string) {
 			continue
 		}
 
-		//Exclude => Continue
-		if getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
+		//Exclude => Continue || ID
+		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
 			continue
 		}
 
@@ -239,8 +239,8 @@ func GetValues(in interface{}) (out []interface{}) {
 			continue
 		}
 
-		//Exclude => Continue
-		if getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
+		//Exclude => Continue || ID
+		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
 			continue
 		}
 
