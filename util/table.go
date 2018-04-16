@@ -151,7 +151,10 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 	cls := []Desc{}
 	for i := 0; i < num; i++ {
 
-		if val.Field(i).Kind() == reflect.Struct {
+		field := ref.Field(i)
+
+		//如果sub结构体没有被exclude
+		if !getBoolColumn(field.Tag.Get("exclude")) && val.Field(i).Kind() == reflect.Struct {
 			desc, _, err := GetInfo(val.Field(i).Interface())
 			if err != nil {
 				return nil, "", err
@@ -160,7 +163,6 @@ func GetInfo(st interface{}) ([]Desc, string, error) {
 			continue
 		}
 
-		field := ref.Field(i)
 		temp := Desc{
 			Name:     field.Name,
 			Typ:      getOriginType(field.Type.Name()),
