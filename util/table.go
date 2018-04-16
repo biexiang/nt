@@ -20,7 +20,7 @@ Define
 	default 默认值/自增(auto)
 	comment 注释
 	exclude 不否包含到sql
-
+	id
 **/
 
 //Desc 数据表字段描述
@@ -215,8 +215,8 @@ func GetFields(in interface{}) (out []string) {
 			continue
 		}
 
-		//Exclude => Continue || ID
-		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
+		//如果列的值没有设置
+		if getBoolColumn(fs.Field(i).Tag.Get("exclude")) || IsZero(vs.Field(i).Interface()) {
 			continue
 		}
 
@@ -239,8 +239,8 @@ func GetValues(in interface{}) (out []interface{}) {
 			continue
 		}
 
-		//Exclude => Continue || ID
-		if fs.Field(i).Name == "ID" || getBoolColumn(fs.Field(i).Tag.Get("exclude")) {
+		//如果列的值没有设置
+		if getBoolColumn(fs.Field(i).Tag.Get("exclude")) || IsZero(vs.Field(i).Interface()) {
 			continue
 		}
 
@@ -277,4 +277,9 @@ func GetFieldValue(in interface{}, key string) (interface{}, error) {
 		return "", ErrKeyNotFound
 	}
 	return reflect.ValueOf(in).FieldByName(key).Interface(), nil
+}
+
+//IsZero 判断interface{}是否为0、""、nil
+func IsZero(x interface{}) bool {
+	return x == reflect.Zero(reflect.TypeOf(x)).Interface()
 }
